@@ -14,6 +14,50 @@ load_dotenv()
 # Configure Google Gemini Pro Vision API
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
+import mysql.connector
+
+# Connect to MySQL server
+try:
+    connection = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password=""
+    )
+    cursor = connection.cursor()
+
+    # Check if the database exists
+    cursor.execute("SHOW DATABASES LIKE 'expiry'")
+    database_exists = cursor.fetchone()
+
+    if not database_exists:
+        # Create the database
+        cursor.execute("CREATE DATABASE expiry")
+        print("Database 'expiry' created successfully.")
+
+    # Connect to the 'expiry' database
+    connection.database = "expiry"
+
+    # Create the 'invoice' table if it doesn't exist
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS invoice (
+            sno INT AUTO_INCREMENT PRIMARY KEY,
+            email VARCHAR(100),
+            product_names VARCHAR(200),
+            expire_dates VARCHAR(300)
+        )
+    """)
+    print("Table 'invoice' created successfully.")
+
+except mysql.connector.Error as error:
+    print("Error:", error)
+
+finally:
+    # Close the cursor and connection
+    if 'connection' in locals():
+        cursor.close()
+        connection.close()
+
+
 # Database connection
 db_connection=mysql.connector.connect(
         host="localhost",
